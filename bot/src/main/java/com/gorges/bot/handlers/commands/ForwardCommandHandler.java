@@ -1,60 +1,39 @@
 package com.gorges.bot.handlers.commands;
 
-import com.gorges.bot.handlers.ActionHandler;
 import com.gorges.bot.handlers.CommandHandler;
-import com.gorges.bot.models.domain.UserAction;
 import com.gorges.bot.models.domain.Command;
-import com.gorges.bot.repositories.UserActionRepository;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import com.gorges.bot.models.domain.MultiMessage;
+import com.gorges.bot.repositories.MultiMessageRepository;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-public class ActionCommandHandler implements CommandHandler, ActionHandler {
+public class ProcessRepliesCommandHandler implements CommandHandler {
 
-    private final String ASK_NAME_ACTION = "person=name";
-    private static final Pattern NAME_PATTERN = Pattern.compile("[a-zA-Z]");
-    private final UserActionRepository userActionRepository;
+    public static final String REPLIES_DELIMITER = "\n\n";
 
-    public ActionCommandHandler(UserActionRepository userActionRepository) {
-        this.userActionRepository = userActionRepository;
-    }
+    private final MultiMessageRepository multiMessageRepository;
 
-    @Override
-    public boolean canHandleAction(Update update, String action) {
-        return update.hasMessage();
-    }
+    public ProcessRepliesCommandHandler(MultiMessageRepository multiMessageRepository) {
+        this.multiMessageRepository = multiMessageRepository;
 
-    @Override
-    public void handleAction(AbsSender absSender, Update update, String action) throws TelegramApiException {
-        Long chatId = update.getMessage().getChatId();
-        String text = update.getMessage().getText();
-
-        if (!NAME_PATTERN.matcher(text).find()) {
-            // not correct name
-            return;
-        }
-
-        // proceed
     }
 
     @Override
     public void executeCommand(AbsSender absSender, Update update, Long chatId) throws TelegramApiException {
-        userActionRepository.updateByChatId(
-            chatId, new UserAction(getCommand(), ASK_NAME_ACTION));
+        MultiMessage multiMessage = multiMessageRepository.getByChatId(chatId);
+        String text = multiMessage.getMessages().stream()
+            .map(Message::getText)
+            .collect(Collectors.joining(REPLIES_DELIMITER));
 
-        SendMessage sendMessage = SendMessage.builder()
-            .text("🧔 What's your name?")
-            .chatId(update.getMessage().getChatId())
-            .build();
-
-        absSender.execute(sendMessage);
+        System.out.println(text);
     }
 
     @Override
     public Command getCommand() {
-        return Command.ENTER_NAME_EXAMPLE;
+        return Command.PROCESS_REPLIES;
     }
 }
