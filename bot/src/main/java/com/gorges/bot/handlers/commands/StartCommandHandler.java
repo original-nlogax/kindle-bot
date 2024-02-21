@@ -3,6 +3,7 @@ package com.gorges.bot.handlers.commands;
 
 import com.gorges.bot.core.Config;
 import com.gorges.bot.handlers.UpdateHandler;
+import com.gorges.bot.handlers.commands.registries.CommandHandlerRegistry;
 import com.gorges.bot.models.domain.Button;
 import com.gorges.bot.models.domain.Command;
 import com.gorges.bot.models.entities.User;
@@ -11,9 +12,6 @@ import com.gorges.bot.repositories.UserRepository;
 import com.gorges.bot.services.MessageService;
 import org.telegram.telegrambots.meta.api.methods.menubutton.SetChatMenuButton;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updates.DeleteWebhook;
-import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.menubutton.MenuButtonWebApp;
 import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
@@ -26,14 +24,16 @@ public class StartCommandHandler implements UpdateHandler {
     private final Config config;
     private final AdminRepository adminRepository;
     private final UserRepository userRepository;
+    private final CommandHandlerRegistry commandHandlerRegistry;
 
     public StartCommandHandler(
         MessageService messageService, Config config,
-        AdminRepository adminRepository, UserRepository userRepository) {
+        AdminRepository adminRepository, UserRepository userRepository, CommandHandlerRegistry commandHandlerRegistry) {
         this.config = config;
         this.messageService = messageService;
         this.adminRepository = adminRepository;
         this.userRepository = userRepository;
+        this.commandHandlerRegistry = commandHandlerRegistry;
     }
 
     @Override
@@ -51,26 +51,33 @@ public class StartCommandHandler implements UpdateHandler {
     @Override
     public void handleUpdate(AbsSender absSender, Update update) throws TelegramApiException {
         Long chatId = update.getMessage().getChatId();
-        SendMessage sendMessage = SendMessage.builder()
-            .text(messageService.findByName("START_MESSAGE").buildText())
-            .replyMarkup(Button.createGeneralMenuKeyboard())
-            .chatId(chatId)
-            .build();
 
-        absSender.execute(sendMessage);
+        sendGreeting(absSender, chatId);
+        sendInstruction(absSender, chatId);
 
         saveUser(update);
-        if (adminRepository.isAdmin(chatId)) {
-            SendMessage sendMessage2 = SendMessage.builder()
-                .text("admin")
-                .chatId(chatId)
-                .build();
 
-            absSender.execute(sendMessage2);
-        }
+        commandHandlerRegistry.find(Command.ENTER_EMAIL)
+            .executeCommand(absSender, update, chatId);
 
-        if (adminRepository.isAdmin(chatId))
-            sendAdminPanelButton(absSender, chatId);
+        //if (adminRepository.isAdmin(chatId))
+        //    sendAdminPanelButton(absSender, chatId);
+    }
+
+    private void sendGreeting (AbsSender absSender, long chatId) throws TelegramApiException {
+        SendMessage sendMessage = SendMessage.builder()
+            .text("Hello!")
+            .chatId(chatId)
+            .build();
+        absSender.execute(sendMessage);
+    }
+
+    private void sendInstruction (AbsSender absSender, long chatId) throws TelegramApiException {
+        SendMessage sendMessage = SendMessage.builder()
+            .text("How to use this bot:")
+            .chatId(chatId)
+            .build();
+        absSender.execute(sendMessage);
     }
 
     private void saveUser (Update update) {
@@ -88,30 +95,11 @@ public class StartCommandHandler implements UpdateHandler {
     }
 
     public void sendAdminPanelButton(AbsSender absSender, Long chatId) throws TelegramApiException {
-        //if (!config.get("telegram.admin.chat-id").contains(String.valueOf(chatId)))
-        //    return;
-
         if (!adminRepository.isAdmin(chatId))
             return;
 
         String text = "Админ-Панель";
         String url = config.get("server.url");
-
-        /*
-        SetWebhook setWebhook = SetWebhook.builder()
-            .url(url)
-            .certificate(new InputFile(
-                StartCommandHandler.class.getClassLoader().getResourceAsStream("local-cert.crt"),
-                "local-cert.crt"))
-            .build();
-
-        absSender.execute(setWebhook);*/
-
-        /*DeleteWebhook deleteWebhook = DeleteWebhook.builder()
-            .dropPendingUpdates(true)
-            .build();
-
-        absSender.execute(deleteWebhook);*/
 
         SetChatMenuButton chatMenuButton = SetChatMenuButton.builder()
             .chatId(chatId)

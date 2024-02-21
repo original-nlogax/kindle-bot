@@ -2,12 +2,30 @@ package com.gorges.bot.handlers.commands;
 
 import com.gorges.bot.handlers.ActionHandler;
 import com.gorges.bot.handlers.CommandHandler;
+import com.gorges.bot.handlers.commands.registries.CommandHandlerRegistry;
 import com.gorges.bot.models.domain.Command;
+import com.gorges.bot.models.domain.MultiMessage;
+import com.gorges.bot.models.domain.UserAction;
+import com.gorges.bot.repositories.MultiMessageRepository;
+import com.gorges.bot.repositories.UserActionRepository;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class DataCommandHandler implements ActionHandler, CommandHandler {
+public class SentDataCommandHandler implements ActionHandler, CommandHandler {
+
+    private final String SENT_DATA_ACTION = "sent-data";
+    private final CommandHandlerRegistry commandHandlerRegistry;
+    private final UserActionRepository userActionRepository;
+    private final MultiMessageRepository multiMessageRepository;
+
+    public SentDataCommandHandler(CommandHandlerRegistry commandHandlerRegistry, UserActionRepository userActionRepository, MultiMessageRepository multiMessageRepository) {
+        this.commandHandlerRegistry = commandHandlerRegistry;
+        this.userActionRepository = userActionRepository;
+        this.multiMessageRepository = multiMessageRepository;
+    }
+
     @Override
     public boolean canHandleAction(Update update, String action) {
         return  update.hasMessage() && (
@@ -17,16 +35,56 @@ public class DataCommandHandler implements ActionHandler, CommandHandler {
 
     @Override
     public void handleAction(AbsSender absSender, Update update, String action) throws TelegramApiException {
+        Message message = update.getMessage();
 
+        if (message.hasDocument())
+            document(absSender, update);
+
+        if (message.getForwardFromChat() != null &&
+            message.getForwardFromChat().getType().equals("channel"))
+            forward(absSender, update);
+    }
+
+    private void document(AbsSender absSender, Update update) throws TelegramApiException {
+        Message message = update.getMessage();
+
+        commandHandlerRegistry.find(Command.BOOK).executeCommand(
+            absSender, update, message.getChatId()
+        );
+    }
+
+    private void forward(AbsSender absSender, Update update) {
+        Long chatId = update.getMessage().getChatId();
+
+        MultiMessage multiMessage = multiMessageRepository.getByChatId(chatId);
+
+        if (multiMessage == null) {
+            multiMessage = new MultiMessage();
+            multiMessage.setCallback(() -> {
+                try {
+                    commandHandlerRegistry.find(Command.FORWARD).executeCommand(
+                        absSender, update, chatId);
+                    multiMessageRepository.delete(chatId);
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+
+        multiMessage.addMessage(update.getMessage());
+        multiMessage.startCollecting(); // resetting timer after each new message
+
+        multiMessageRepository.save(chatId, multiMessage);
     }
 
     @Override
-    public void executeCommand(AbsSender absSender, Update update, Long chatId) throws TelegramApiException {
-
+    public void executeCommand(AbsSender absSender, Update update, Long chatId, Object... args) throws TelegramApiException {
+        userActionRepository.updateByChatId(
+            chatId, new UserAction(getCommand(), SENT_DATA_ACTION));
     }
 
     @Override
     public Command getCommand() {
-        return Command.DATA;
+        return Command.SENT_DATA;
     }
 }

@@ -9,7 +9,6 @@ public interface ActionHandler extends Handler {
     boolean canHandleAction(Update update, String action);
 
     void handleAction(AbsSender absSender, Update update, String action) throws TelegramApiException;
-
     default boolean isAction (Update update, String updateAction, String thisAction) {
         return update.hasMessage()
             && update.getMessage().hasText()

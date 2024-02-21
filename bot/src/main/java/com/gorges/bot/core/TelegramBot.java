@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.input.TeeInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -29,7 +30,9 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final Map<Command, UpdateHandler> updateHandlers;
     private final Map<Command, ActionHandler> actionHandlers;
 
-    public TelegramBot(
+    private static TelegramBot INSTANCE;
+
+    private TelegramBot(
             Config config,
             UserActionRepository userActionRepository,
             List<UpdateHandler> updateHandlers,
@@ -42,6 +45,20 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.actionHandlers = actionHandlers.stream().collect(toMap(ActionHandler::getCommand, identity()));
 
         System.out.println("Started");
+    }
+
+    public static void initialize(
+        Config config,
+        UserActionRepository userActionRepository,
+        List<UpdateHandler> updateHandlers,
+        List<ActionHandler> actionHandlers) {
+        INSTANCE = new TelegramBot(
+            config, userActionRepository,
+            updateHandlers, actionHandlers);
+    }
+
+    public static TelegramBot get() {
+        return INSTANCE;
     }
 
     @Override

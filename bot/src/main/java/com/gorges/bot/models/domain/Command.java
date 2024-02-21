@@ -2,6 +2,10 @@ package com.gorges.bot.models.domain;
 
 public enum Command {
 
-    START
+    START,
+    ENTER_EMAIL,
+    SENT_DATA,
+    BOOK,
+    FORWARD,
 
 }

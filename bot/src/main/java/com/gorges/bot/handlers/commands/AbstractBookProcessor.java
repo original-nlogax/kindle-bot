@@ -9,13 +9,12 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public abstract class AbstractBookProcessorCommandHandler {
+public abstract class AbstractBookProcessor {
 
     private final MailService mailService;
     private final UserRepository userRepository;
 
-    protected AbstractBookProcessorCommandHandler
-        (MailService mailService, UserRepository userRepository) {
+    protected AbstractBookProcessor (MailService mailService, UserRepository userRepository) {
         this.mailService = mailService;
         this.userRepository = userRepository;
     }

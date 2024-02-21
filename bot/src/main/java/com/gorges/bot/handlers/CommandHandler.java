@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public interface CommandHandler extends Handler {
 
-    void executeCommand(AbsSender absSender, Update update, Long chatId) throws TelegramApiException;
+    void executeCommand(AbsSender absSender, Update update, Long chatId, Object... args) throws TelegramApiException;
+
 
 }

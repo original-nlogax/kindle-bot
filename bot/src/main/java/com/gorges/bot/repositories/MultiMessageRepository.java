@@ -1,4 +1,13 @@
 package com.gorges.bot.repositories;
 
-public interface GroupMessageStateRepository {
+import com.gorges.bot.models.domain.MultiMessage;
+
+public interface MultiMessageRepository {
+
+    MultiMessage getByChatId (long chatId);
+
+    void save (long chatId, MultiMessage multiMessage);
+
+    void delete(Long chatId);
+
 }
