@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
-public class ForwardCommandHandler extends AbstractBookProcessor implements CommandHandler {
+public class ForwardCommandHandler extends AbstractBookSender implements CommandHandler {
 
-    public static final String FORWARD_DELIMITER = "\n\n";
+    public static final String MESSAGES_DELIMITER = "\n\n";
     public static final int MAX_TITLE_LENGTH = 40;
 
     private final MultiMessageRepository multiMessageRepository;
@@ -44,7 +44,9 @@ public class ForwardCommandHandler extends AbstractBookProcessor implements Comm
         MultiMessage multiMessage = multiMessageRepository.getByChatId(chatId);
         String text = multiMessage.getMessages().stream()
             .map(Message::getText)
-            .collect(Collectors.joining(FORWARD_DELIMITER));
+            .collect(Collectors.joining(MESSAGES_DELIMITER));
+        for (Message message : multiMessage.getMessages())
+            deleteMessage (absSender, message);
 
         Message processingMessage = sendProcessingMessage (absSender, chatId);
         File book = createBook (multiMessage.getMessages().get(0), text);

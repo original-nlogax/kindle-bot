@@ -17,7 +17,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.List;
 
 
-public class BookCommandHandler extends AbstractBookProcessor implements CommandHandler {
+public class BookCommandHandler extends AbstractBookSender implements CommandHandler {
 
     public static final List<String> READABLE_FORMATS = List.of(
         "fb2", "epub", "pdf"    // todo azw, azw3, kfx, etc...

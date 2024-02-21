@@ -14,7 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 public enum Button {
 
     START("/start"),
-    EXAMPLE("\uD83D\uDCE6 Example");
+    SETTINGS("⚙ Настройки");
 
     private final String alias;
 
@@ -26,14 +26,14 @@ public enum Button {
         return alias;
     }
 
-    public static ReplyKeyboardMarkup createGeneralMenuKeyboard() {
+    public static ReplyKeyboardMarkup createSettingsMenuKeyboard() {
         ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder keyboardBuilder = ReplyKeyboardMarkup.builder();
         keyboardBuilder.resizeKeyboard(true);
         keyboardBuilder.selective(true);
 
         keyboardBuilder.keyboardRow(new KeyboardRow(Arrays.asList(
                 builder().text(
-                    EXAMPLE.getAlias()).build()
+                    SETTINGS.getAlias()).build()
                 )));
 
         return keyboardBuilder.build();

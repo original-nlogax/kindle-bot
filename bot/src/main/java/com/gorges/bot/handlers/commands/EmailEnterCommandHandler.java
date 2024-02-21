@@ -2,7 +2,9 @@ package com.gorges.bot.handlers.commands;
 
 import com.gorges.bot.handlers.ActionHandler;
 import com.gorges.bot.handlers.CommandHandler;
+import com.gorges.bot.handlers.UpdateHandler;
 import com.gorges.bot.handlers.commands.registries.CommandHandlerRegistry;
+import com.gorges.bot.models.domain.Button;
 import com.gorges.bot.models.domain.Command;
 import com.gorges.bot.models.domain.UserAction;
 import com.gorges.bot.models.entities.User;
@@ -14,7 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class EmailEnterCommandHandler implements CommandHandler, ActionHandler {
+public class EmailEnterCommandHandler implements UpdateHandler, CommandHandler, ActionHandler {
 
     private final String ENTER_EMAIL_ACTION = "enter-email";
 
@@ -70,6 +72,7 @@ public class EmailEnterCommandHandler implements CommandHandler, ActionHandler {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
             .text("Bot is ready to receive data!")
+            .replyMarkup(Button.createSettingsMenuKeyboard())
             .build();
         absSender.execute(sendMessage);
     }
@@ -93,5 +96,16 @@ public class EmailEnterCommandHandler implements CommandHandler, ActionHandler {
     @Override
     public Command getCommand() {
         return Command.ENTER_EMAIL;
+    }
+
+    @Override
+    public boolean canHandleUpdate(Update update) {
+        return update.hasMessage()
+            && update.getMessage().getText().equals(Button.SETTINGS.getAlias());
+    }
+
+    @Override
+    public void handleUpdate(AbsSender absSender, Update update) throws TelegramApiException {
+        executeCommand(absSender, update, update.getMessage().getChatId());
     }
 }

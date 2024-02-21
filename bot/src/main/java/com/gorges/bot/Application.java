@@ -76,7 +76,8 @@ public class Application {
         updateHandlers = new ArrayList<>();
 
         updateHandlers.addAll(List.of(
-            new StartCommandHandler(messageService, config, adminRepository, userRepository, commandHandlerRegistry)
+            new StartCommandHandler(messageService, config, adminRepository, userRepository, commandHandlerRegistry),
+            new EmailEnterCommandHandler(commandHandlerRegistry, userActionRepository, userRepository)
         ));
     }
 
