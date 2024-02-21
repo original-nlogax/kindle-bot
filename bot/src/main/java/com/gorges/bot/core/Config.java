@@ -1,9 +1,9 @@
 package com.gorges.bot.core;
 
+import com.gorges.bot.utils.Utils;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 public class Config {
@@ -22,7 +22,8 @@ public class Config {
     }
 
     private void load() {
-        try (InputStream stream = Config.class.getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream stream = Utils.getResource("application.properties")) {
+        //try (InputStream stream = Config.class.getClassLoader().getResourceAsStream("application.properties")) {
             properties.load(stream);
         } catch (IOException e) {
             throw new IllegalStateException("Failed load config file", e);

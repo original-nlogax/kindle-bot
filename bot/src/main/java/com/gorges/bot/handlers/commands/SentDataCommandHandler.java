@@ -8,6 +8,8 @@ import com.gorges.bot.models.domain.MultiMessage;
 import com.gorges.bot.models.domain.UserAction;
 import com.gorges.bot.repositories.MultiMessageRepository;
 import com.gorges.bot.repositories.UserActionRepository;
+import com.gorges.bot.utils.Utils;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.bots.AbsSender;
@@ -40,16 +42,33 @@ public class SentDataCommandHandler implements ActionHandler, CommandHandler {
         if (message.hasDocument())
             document(absSender, update);
 
-        if (message.getForwardFromChat() != null &&
+        else if (message.getForwardFromChat() != null &&
             message.getForwardFromChat().getType().equals("channel"))
             forward(absSender, update);
+
+        else if (Utils.isValidURL(message.getText()))
+            link(absSender, update);
+
+        else sendPossibleInputsMessage(absSender, message.getChatId());
+    }
+
+    private void sendPossibleInputsMessage (AbsSender absSender, long chatId) throws TelegramApiException {
+        SendMessage sendMessage = SendMessage.builder()
+            .chatId(chatId)
+            .text("Forward me some messages, send a book — or a link to telegra.ph or teletype.in!")
+            .build();
+        absSender.execute(sendMessage);
+    }
+
+    private void link (AbsSender absSender, Update update) throws TelegramApiException {
+        commandHandlerRegistry.find(Command.LINK).executeCommand(
+            absSender, update, update.getMessage().getChatId()
+        );
     }
 
     private void document(AbsSender absSender, Update update) throws TelegramApiException {
-        Message message = update.getMessage();
-
         commandHandlerRegistry.find(Command.BOOK).executeCommand(
-            absSender, update, message.getChatId()
+            absSender, update, update.getMessage().getChatId()
         );
     }
 

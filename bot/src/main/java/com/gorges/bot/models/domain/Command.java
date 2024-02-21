@@ -6,6 +6,6 @@ public enum Command {
     ENTER_EMAIL,
     SENT_DATA,
     BOOK,
-    FORWARD,
+    FORWARD, LINK,
 
 }

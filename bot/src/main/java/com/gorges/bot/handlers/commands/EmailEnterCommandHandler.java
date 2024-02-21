@@ -41,7 +41,7 @@ public class EmailEnterCommandHandler implements UpdateHandler, CommandHandler, 
         String email = update.getMessage().getText();
 
         if (!JMail.isValid(email)) {
-            sendUncorrectEmailMessage(absSender, chatId);
+            sendIncorrectEmailMessage(absSender, chatId);
             commandHandlerRegistry.find(Command.ENTER_EMAIL)
                 .executeCommand(absSender, update, chatId);
             return;
@@ -71,16 +71,16 @@ public class EmailEnterCommandHandler implements UpdateHandler, CommandHandler, 
     private void sendReadyMessage(AbsSender absSender, long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
-            .text("Bot is ready to receive data!")
+            .text("Отлично! Теперь вы можете пересылать сюда сообщения или книги")
             .replyMarkup(Button.createSettingsMenuKeyboard())
             .build();
         absSender.execute(sendMessage);
     }
 
-    private void sendUncorrectEmailMessage (AbsSender absSender, Long chatId) throws TelegramApiException {
+    private void sendIncorrectEmailMessage(AbsSender absSender, Long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
-            .text("Email is uncorrect")
+            .text("❌ Email is incorrect")
             .build();
         absSender.execute(sendMessage);
     }
@@ -88,7 +88,7 @@ public class EmailEnterCommandHandler implements UpdateHandler, CommandHandler, 
     private void sendEmailEnterMessage (AbsSender absSender, Long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
-            .text("Enter your kindle email:")
+            .text("📧 Enter your kindle email:")
             .build();
         absSender.execute(sendMessage);
     }

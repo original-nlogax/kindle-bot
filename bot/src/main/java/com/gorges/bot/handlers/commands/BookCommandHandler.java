@@ -45,9 +45,9 @@ public class BookCommandHandler extends AbstractBookSender implements CommandHan
         }
 
         Message processingMessage = sendProcessingMessage(absSender, chatId);
-        java.io.File book = downloadBook (absSender, document);
-        java.io.File convertedBook = convert (book);
-        send (chatId, convertedBook);
+        java.io.File book = convert (
+            downloadBook (absSender, document));
+        sendBook(chatId, book);
         deleteMessage (absSender, processingMessage);
         sendSentMessage (absSender, chatId);
     }
@@ -73,7 +73,7 @@ public class BookCommandHandler extends AbstractBookSender implements CommandHan
     private void sendFormatErrorMessage (AbsSender absSender, Long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
-            .text("Неизвестный формат! Я могу читать только "
+            .text("❌ Неизвестный формат. Я могу читать только: "
                 + String.join(", ", READABLE_FORMATS) + ".")
             .build();
 

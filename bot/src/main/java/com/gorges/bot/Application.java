@@ -66,7 +66,8 @@ public class Application {
             new SentDataCommandHandler(commandHandlerRegistry, userActionRepository, multiMessageRepository),
             new EmailEnterCommandHandler(commandHandlerRegistry, userActionRepository, userRepository),
             new ForwardCommandHandler(multiMessageRepository, mailService, userRepository),
-            new BookCommandHandler(mailService, userRepository)
+            new BookCommandHandler(mailService, userRepository),
+            new LinkCommandHandler(mailService, userRepository)
         ));
 
         commandHandlerRegistry.setCommandHandlers(commandHandlers);

@@ -11,6 +11,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public abstract class AbstractBookSender {
 
+    public static final int MAX_TITLE_LENGTH = 40;
+
     private final MailService mailService;
     private final UserRepository userRepository;
 
@@ -19,10 +21,10 @@ public abstract class AbstractBookSender {
         this.userRepository = userRepository;
     }
 
-    protected void send(Long chatId, java.io.File book) {
+    protected void sendBook (Long chatId, java.io.File book) {
         User user = userRepository.findByChatId(chatId);
         String to = user.getEmail();
-        mailService.send(book, to);
+        //mailService.send(book, to);
     }
 
     protected Message sendProcessingMessage(AbsSender absSender, Long chatId) throws TelegramApiException {
