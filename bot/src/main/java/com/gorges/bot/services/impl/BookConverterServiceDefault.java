@@ -32,18 +32,19 @@ public class BookConverterServiceDefault implements BookConverterService {
     @Override
     public File fb2ToEpub(File book) {
         Path sourcePath = Paths.get(book.getAbsolutePath());
-        String sourceFolder = sourcePath.getParent().toString();
-        Path destPath = Paths.get(sourceFolder + "/");
+        Path sourceFolder = sourcePath.getParent();
 
         String exec = getCmdPath()
             + "fb2c" + (OSValidator.isWindows() ? ".exe" : "")
             + " convert --to epub "
             + "\"" + sourcePath + "\" "
-            + "\"" + destPath + "\"";
+            + "\"" + sourceFolder + "\"";
 
         run(exec);
 
-        return destPath.toFile();
+        String nameWithoutExtension = book.getName()
+            .substring(0, book.getName().lastIndexOf("."));
+        return new File(sourceFolder + "\\" + nameWithoutExtension + ".epub");
     }
 
     @Override

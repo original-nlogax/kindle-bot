@@ -34,11 +34,13 @@ public class MailServiceDefault implements MailService {
 
     @Override
     public void send(final File book, String to) {
+        System.out.println("Sending book to " + to + "...");
+        /*
         try {
             book.renameTo(File.createTempFile("book", ".epub", book.getParentFile()));
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }*/
 
         Email email = EmailBuilder.startingBlank()
             .from("Bot", from)
@@ -48,6 +50,6 @@ public class MailServiceDefault implements MailService {
 
         mailer.sendMail(email);
 
-        book.delete();
+        //book.delete();
     }
 }

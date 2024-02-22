@@ -7,10 +7,8 @@ import com.gorges.bot.repositories.MultiMessageRepository;
 import com.gorges.bot.repositories.UserRepository;
 import com.gorges.bot.services.MailService;
 import com.gorges.bot.utils.Utils;
-import nl.siegmann.epublib.domain.Author;
-import nl.siegmann.epublib.domain.Book;
-import nl.siegmann.epublib.domain.Metadata;
-import nl.siegmann.epublib.domain.Resource;
+import nl.siegmann.epublib.domain.*;
+import nl.siegmann.epublib.epub.EpubReader;
 import nl.siegmann.epublib.epub.EpubWriter;
 import nl.siegmann.epublib.service.MediatypeService;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -20,6 +18,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -51,19 +50,22 @@ public class ForwardCommandHandler extends AbstractBookSender implements Command
 
         // todo multiple authors; pass multiMessage.getMessages() to createBook
         String author = multiMessage.getMessages().get(0).getForwardFromChat().getTitle();
-        Message processingMessage = sendSendingMessage(absSender, chatId);
+        Message sendingMessage = sendSendingMessage(absSender, chatId);
         File book = createBook (author, text);
         sendBook (chatId, book);
-        deleteMessage (absSender, processingMessage);
+        deleteMessage (absSender, sendingMessage);
         sendSentMessage (absSender, chatId);
     }
 
     private String getHtmlText (Message message) {
+        String text = message.getText();
+        //int brTagsCount = (text.length() - text.replace("\n", "").length());
+
         if (!message.hasEntities())
-            return message.getText();
+            return text;
 
         StringBuilder sb = new StringBuilder();
-        sb.append(message.getText());
+        sb.append(text);
 
         int tagOffset = 0;
         for (MessageEntity entity : message.getEntities()) {
@@ -73,6 +75,12 @@ public class ForwardCommandHandler extends AbstractBookSender implements Command
                 //case "url" -> "a href=" + entity.getUrl();  // todo getUrl is null
                 default -> "";
             };
+
+            if (tag.equals("")) {
+                System.out.println(tag);
+                continue;
+            }
+
             String openingTag = "<" + tag + ">";
             String closingTag = "</" + tag + ">";
             sb.insert(entity.getOffset() + tagOffset, openingTag);
@@ -84,23 +92,28 @@ public class ForwardCommandHandler extends AbstractBookSender implements Command
         return sb.toString();
     }
 
+
     private File createBook(String author, String text) {
-        String title = text.split("<br>")[0].replaceAll("<[^>]*>","");
-        if (title.length() > MAX_TITLE_LENGTH)
-            title = title.substring(0, MAX_TITLE_LENGTH);
-        text = title + "<br><br>" + text.replace("\\\\r?\\\\n", "<br>");
+        String title;
+        if (text.length() > MAX_TITLE_LENGTH)
+            title = text.substring(0, MAX_TITLE_LENGTH) + "...";
+        else
+            title = text;
+
+        title = title.replace("\n", "").replaceAll("<[^>]*>",""); // remove newlines and html tags
+        text = "<html><body>" + title + "<br><br>" + (text.replace("\n", "<br>")) + "</body></html>";
+
 
         Book book = new Book();
         Metadata metadata = book.getMetadata();
         metadata.addTitle(title);
-        metadata.addAuthor(new Author(author, author));
+        metadata.addAuthor(new Author(author));
         book.setCoverImage(Utils.getResource("cover.png", "cover.png"));
         book.addSection("Text", new Resource(
             text.getBytes(StandardCharsets.UTF_8), MediatypeService.XHTML));
 
-        String filename = Utils.removeForbiddenFilenameCharacters(title) + ".epub";
         EpubWriter epubWriter = new EpubWriter();
-
+        String filename = Utils.removeForbiddenFilenameCharacters(title) + ".epub";
         try {
             epubWriter.write(book, new FileOutputStream(filename));
         } catch (IOException e) {

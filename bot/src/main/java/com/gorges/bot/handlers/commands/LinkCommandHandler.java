@@ -40,16 +40,17 @@ public class LinkCommandHandler extends AbstractBookSender implements CommandHan
         String url = update.getMessage().getText();
 
         if (url.contains("telegra.ph")) {
-            Message processingMessage = sendSendingMessage(absSender, chatId);
+            Message sendingMessage = sendSendingMessage(absSender, chatId);
             String articleName = url.split("/")[url.split("/").length-1];
             TelegraphArticle article = getTelegraphArticle (articleName);
-            System.out.println(article.description());
             File book = createBook(
                 article.title(),
                 article.author(),
                 article.description());
+
+
             sendBook (chatId, book);
-            deleteMessage (absSender, processingMessage);
+            deleteMessage (absSender, sendingMessage);
             sendSentMessage (absSender, chatId);
             return;
         }

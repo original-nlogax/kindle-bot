@@ -10,6 +10,8 @@ import com.gorges.bot.models.entities.User;
 import com.gorges.bot.repositories.AdminRepository;
 import com.gorges.bot.repositories.UserRepository;
 import com.gorges.bot.services.MessageService;
+import nl.siegmann.epublib.domain.Book;
+import nl.siegmann.epublib.epub.EpubReader;
 import org.telegram.telegrambots.meta.api.methods.menubutton.SetChatMenuButton;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -17,6 +19,9 @@ import org.telegram.telegrambots.meta.api.objects.menubutton.MenuButtonWebApp;
 import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class StartCommandHandler implements UpdateHandler {
 
@@ -69,6 +74,7 @@ public class StartCommandHandler implements UpdateHandler {
     private void sendGreeting (AbsSender absSender, long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .text("👋")
+            .replyMarkup(Button.createSettingsMenuKeyboard())
             .chatId(chatId)
             .build();
         absSender.execute(sendMessage);

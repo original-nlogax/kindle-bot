@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public abstract class AbstractBookSender {
 
-    public static final int MAX_TITLE_LENGTH = 40;
+    public static final int MAX_TITLE_LENGTH = 32;
 
     private final MailService mailService;
     private final UserRepository userRepository;
@@ -24,7 +24,6 @@ public abstract class AbstractBookSender {
     protected void sendBook (Long chatId, java.io.File book) {
         User user = userRepository.findByChatId(chatId);
         String to = user.getEmail();
-        System.out.println("Sending book to " + to + "...");
         mailService.send(book, to);
     }
 
@@ -33,6 +32,19 @@ public abstract class AbstractBookSender {
             .chatId(chatId)
             .text("✉ Отправляю...")
             .build();
+
+        /*
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    sendSentMessage(absSender, chatId);
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }, 30*1000);*/
 
         return absSender.execute(sendMessage);
     }
