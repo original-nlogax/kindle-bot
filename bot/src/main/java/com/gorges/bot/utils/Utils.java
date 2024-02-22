@@ -3,8 +3,10 @@ package com.gorges.bot.utils;
 import com.gorges.bot.core.Config;
 import nl.siegmann.epublib.domain.Resource;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.regex.Pattern;
 
@@ -35,6 +37,18 @@ public class Utils {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public static File getResourcesPath (String path) {
+        URL url = Config.class.getClassLoader().getResource(path);
+        File file = null;
+        try {
+            file = new File(url.toURI());
+        } catch (URISyntaxException e) {
+            file = new File(url.getPath());
+        }
+
+        return file;
     }
 
     public static InputStream getResource (String path) {

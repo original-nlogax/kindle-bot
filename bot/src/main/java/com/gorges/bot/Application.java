@@ -9,7 +9,9 @@ import com.gorges.bot.repositories.*;
 import com.gorges.bot.repositories.database.AdminRepositoryDefault;
 import com.gorges.bot.repositories.database.UserRepositoryDefault;
 import com.gorges.bot.repositories.memory.MultiMessageRepositoryDefault;
+import com.gorges.bot.services.BookConverterService;
 import com.gorges.bot.services.MailService;
+import com.gorges.bot.services.impl.BookConverterServiceDefault;
 import com.gorges.bot.services.impl.MailServiceDefault;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -39,6 +41,7 @@ public class Application {
 
     private MessageService messageService;
     private MailService mailService;
+    private BookConverterService bookConverterService;
 
     private CommandHandlerRegistry commandHandlerRegistry;
     private List<CommandHandler> commandHandlers;
@@ -51,6 +54,7 @@ public class Application {
         adminRepository = new AdminRepositoryDefault();
         userRepository = new UserRepositoryDefault();
         multiMessageRepository = new MultiMessageRepositoryDefault();
+        bookConverterService = new BookConverterServiceDefault();
     }
 
     private void initializeServices() {
@@ -66,7 +70,7 @@ public class Application {
             new SentDataCommandHandler(commandHandlerRegistry, userActionRepository, multiMessageRepository),
             new EmailEnterCommandHandler(commandHandlerRegistry, userActionRepository, userRepository),
             new ForwardCommandHandler(multiMessageRepository, mailService, userRepository),
-            new BookCommandHandler(mailService, userRepository),
+            new BookCommandHandler(mailService, userRepository, bookConverterService),
             new LinkCommandHandler(mailService, userRepository)
         ));
 

@@ -101,6 +101,7 @@ public class EmailEnterCommandHandler implements UpdateHandler, CommandHandler, 
     @Override
     public boolean canHandleUpdate(Update update) {
         return update.hasMessage()
+            && update.getMessage().hasText()
             && update.getMessage().getText().equals(Button.SETTINGS.getAlias());
     }
 
