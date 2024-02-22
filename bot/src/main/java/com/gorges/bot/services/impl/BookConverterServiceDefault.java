@@ -1,7 +1,10 @@
 package com.gorges.bot.services.impl;
 
 import com.gorges.bot.services.BookConverterService;
+import com.gorges.bot.utils.ConvertResult;
 import com.gorges.bot.utils.OSValidator;
+import com.gorges.bot.utils.Utils;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -10,13 +13,18 @@ import java.nio.file.Paths;
 public class BookConverterServiceDefault implements BookConverterService {
 
     @Override
-    public File convert(File book) {
-        String format = book.getName().split("\\.")[1];
-        return switch (format) {
-            case "fb2" -> fb2ToEpub(book);
-            case "pdf" -> optimizePdf(book);
-            default -> book;
-        };
+    public void convert(File book, ConvertResult result) {
+        new Thread(() -> {
+            try {
+                String format = Utils.getFileExtension(book.getName());
+                switch (format) {
+                    case "fb2" -> result.done(fb2ToEpub(book));
+                    case "pdf" -> optimizePdf(book);
+                }
+            } catch (TelegramApiException exception) {
+                throw new RuntimeException(exception);
+            }
+        }).start();
     }
 
     @Override
@@ -40,7 +48,9 @@ public class BookConverterServiceDefault implements BookConverterService {
     public File optimizePdf(File book) {
         Path sourcePath = Paths.get(book.getAbsolutePath());
         String sourceFolder = sourcePath.getParent().toString();
-        Path destPath = Paths.get(sourceFolder + "/");
+        String nameWithoutExtension = book.getName()
+            .substring(0, book.getName().lastIndexOf("."));
+        Path destPath = Paths.get(sourceFolder + "/" + nameWithoutExtension + "_opt.pdf");
 
         String exec = getCmdPath()
             + "k2pdfopt" + (OSValidator.isWindows() ? ".exe" : "")

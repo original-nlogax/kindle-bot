@@ -6,6 +6,8 @@ import com.gorges.bot.models.domain.Command;
 import com.gorges.bot.repositories.UserRepository;
 import com.gorges.bot.services.BookConverterService;
 import com.gorges.bot.services.MailService;
+import com.gorges.bot.utils.ConvertResult;
+import com.gorges.bot.utils.Utils;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Document;
@@ -39,28 +41,43 @@ public class BookCommandHandler extends AbstractBookSender implements CommandHan
     public void executeCommand(AbsSender absSender, Update update, Long chatId, Object... args) throws TelegramApiException {
         Message message = update.getMessage();
         Document document = message.getDocument();
-        //deleteMessage(absSender, message);
 
-        String format = document.getFileName().split("\\.")[1];
-
+        String format = Utils.getFileExtension(document.getFileName());
         if (!AVAILABLE_FORMATS.contains(format)) {
             sendFormatErrorMessage(absSender, chatId);
             return;
         }
 
-        boolean isPdf = format.equals("pdf");
-        Message pdfMessage = null;
-        if (isPdf) pdfMessage = sendPdfMessage(absSender, chatId);
+        final Message convertMessage;
+        if (format.equals("pdf")) convertMessage = sendPdfMessage (absSender, chatId);
+        else convertMessage = sendConvertMessage (absSender, chatId);
 
-        java.io.File book = bookConverterService.convert (
-            downloadBook (absSender, document));
+        final ConvertResult result = (book) -> {
+            if (convertMessage != null) deleteMessage (absSender, convertMessage);
+            Message sendingMessage = sendSendingMessage (absSender, chatId);
+            sendBook(chatId, book);
+            deleteMessage (absSender, sendingMessage);
+            sendSentMessage (absSender, chatId);
+        };
 
-        if (isPdf) deleteMessage (absSender, pdfMessage);
+        bookConverterService.convert (
+            downloadBook (absSender, document), result);
 
+        //if (pdfMessage != null) deleteMessage (absSender, pdfMessage);
+
+        /*
         Message processingMessage = sendProcessingMessage(absSender, chatId);
         sendBook(chatId, book);
         deleteMessage (absSender, processingMessage);
-        sendSentMessage (absSender, chatId);
+        sendSentMessage (absSender, chatId);*/
+    }
+
+    private Message sendConvertMessage(AbsSender absSender, Long chatId) throws TelegramApiException {
+        SendMessage sendMessage = SendMessage.builder()
+            .chatId(chatId)
+            .text("✏ Конвертирую...")
+            .build();
+        return absSender.execute(sendMessage);
     }
 
     private java.io.File downloadBook (AbsSender absSender, Document document) throws TelegramApiException {

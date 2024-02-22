@@ -62,4 +62,12 @@ public class Utils {
             throw new RuntimeException(e);
         }
     }
+
+    public static String getFileExtension(String file) {
+        int lastIndexOf = file.lastIndexOf(".");
+        if (lastIndexOf == -1) {
+            return "";
+        }
+        return file.substring(lastIndexOf + 1);
+    }
 }

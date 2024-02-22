@@ -4,5 +4,3 @@ This bot receives 📚 **books**, 🔗 **telegra.ph** or **teletype.in** article
 <br>It also **optimizes** pdf files for better reading and converts **fb2** books to available format.
 
 Bot in Telegram: [@AllKindleBot](https://t.me/AllKindleBot)
-
-<hr />

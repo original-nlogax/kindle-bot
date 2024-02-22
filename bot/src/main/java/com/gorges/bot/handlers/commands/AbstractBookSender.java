@@ -27,7 +27,7 @@ public abstract class AbstractBookSender {
         //mailService.send(book, to);
     }
 
-    protected Message sendProcessingMessage(AbsSender absSender, Long chatId) throws TelegramApiException {
+    protected Message sendSendingMessage(AbsSender absSender, Long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
             .text("✉ Отправляю...")

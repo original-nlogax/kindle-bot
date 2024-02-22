@@ -1,6 +1,5 @@
 package com.gorges.bot.handlers.commands;
 
-import com.gorges.bot.core.Config;
 import com.gorges.bot.handlers.CommandHandler;
 import com.gorges.bot.models.domain.Command;
 import com.gorges.bot.models.domain.MultiMessage;
@@ -23,7 +22,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
@@ -53,7 +51,7 @@ public class ForwardCommandHandler extends AbstractBookSender implements Command
 
         // todo multiple authors; pass multiMessage.getMessages() to createBook
         String author = multiMessage.getMessages().get(0).getForwardFromChat().getTitle();
-        Message processingMessage = sendProcessingMessage (absSender, chatId);
+        Message processingMessage = sendSendingMessage(absSender, chatId);
         File book = createBook (author, text);
         sendBook (chatId, book);
         deleteMessage (absSender, processingMessage);
