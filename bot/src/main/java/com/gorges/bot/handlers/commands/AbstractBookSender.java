@@ -24,6 +24,7 @@ public abstract class AbstractBookSender {
     protected void sendBook (Long chatId, java.io.File book) {
         User user = userRepository.findByChatId(chatId);
         String to = user.getEmail();
+        System.out.println("Sending book to " + to + "...");
         //mailService.send(book, to);
     }
 

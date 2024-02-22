@@ -16,11 +16,13 @@ public class BookConverterServiceDefault implements BookConverterService {
     public void convert(File book, ConvertResult result) {
         new Thread(() -> {
             try {
-                String format = Utils.getFileExtension(book.getName());
-                switch (format) {
-                    case "fb2" -> result.done(fb2ToEpub(book));
-                    case "pdf" -> optimizePdf(book);
+                File convertedBook;
+                switch (Utils.getFileExtension(book.getName())) {
+                    case "fb2" -> convertedBook = fb2ToEpub(book);
+                    case "pdf" -> convertedBook = optimizePdf(book);
+                    default -> convertedBook = book;
                 }
+                result.done(convertedBook);
             } catch (TelegramApiException exception) {
                 throw new RuntimeException(exception);
             }
