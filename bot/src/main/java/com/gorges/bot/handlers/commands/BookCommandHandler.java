@@ -16,7 +16,6 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 public class BookCommandHandler extends AbstractBookSender implements CommandHandler {
@@ -40,7 +39,7 @@ public class BookCommandHandler extends AbstractBookSender implements CommandHan
     public void executeCommand(AbsSender absSender, Update update, Long chatId, Object... args) throws TelegramApiException {
         Message message = update.getMessage();
         Document document = message.getDocument();
-        deleteMessage(absSender, message);
+        //deleteMessage(absSender, message);
 
         String format = document.getFileName().split("\\.")[1];
         if (!AVAILABLE_FORMATS.contains(format)) {

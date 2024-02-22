@@ -55,7 +55,7 @@ public class SentDataCommandHandler implements ActionHandler, CommandHandler {
     private void sendPossibleInputsMessage (AbsSender absSender, long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
-            .text("Forward me some messages, send a book — or a link to telegra.ph or teletype.in!")
+            .text("Перешлите боту посты ✉, книги 📚 — или 🔗 ссылки на telegra.ph или teletype.in")
             .build();
         absSender.execute(sendMessage);
     }

@@ -53,7 +53,6 @@ public class StartCommandHandler implements UpdateHandler {
         Long chatId = update.getMessage().getChatId();
 
         sendGreeting(absSender, chatId);
-        sendInstruction(absSender, chatId);
 
         saveUser(update);
 
@@ -66,15 +65,7 @@ public class StartCommandHandler implements UpdateHandler {
 
     private void sendGreeting (AbsSender absSender, long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
-            .text("Hello!")
-            .chatId(chatId)
-            .build();
-        absSender.execute(sendMessage);
-    }
-
-    private void sendInstruction (AbsSender absSender, long chatId) throws TelegramApiException {
-        SendMessage sendMessage = SendMessage.builder()
-            .text("How to use this bot:")
+            .text("👋")
             .chatId(chatId)
             .build();
         absSender.execute(sendMessage);

@@ -28,8 +28,8 @@ public class BookConverterServiceDefault implements BookConverterService {
         String exec = getCmdPath()
             + "fb2c" + (OSValidator.isWindows() ? ".exe" : "")
             + " convert --to epub "
-            + sourcePath + " "
-            + destPath;
+            + "\"" + sourcePath + "\" "
+            + "\"" + destPath + "\"";
 
         run(exec);
 
@@ -44,8 +44,8 @@ public class BookConverterServiceDefault implements BookConverterService {
 
         String exec = getCmdPath()
             + "k2pdfopt" + (OSValidator.isWindows() ? ".exe" : "")
-            + " " + sourcePath
-            + " -fc- -odpi 220 -o " + destPath;
+            + " \"" + sourcePath + "\""
+            + " -fc- -odpi 220 -o \"" + destPath + "\"";
 
         run(exec);
 

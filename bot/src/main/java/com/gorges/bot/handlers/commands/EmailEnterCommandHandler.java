@@ -48,7 +48,7 @@ public class EmailEnterCommandHandler implements UpdateHandler, CommandHandler, 
         }
 
         saveEmail (email, chatId);
-        sendReadyMessage (absSender, chatId);
+        sendPossibleInputsMessage (absSender, chatId);
 
         commandHandlerRegistry.find(Command.SENT_DATA)
             .executeCommand(absSender, update, chatId);
@@ -68,11 +68,10 @@ public class EmailEnterCommandHandler implements UpdateHandler, CommandHandler, 
         sendEmailEnterMessage(absSender, chatId);
     }
 
-    private void sendReadyMessage(AbsSender absSender, long chatId) throws TelegramApiException {
+    private void sendPossibleInputsMessage (AbsSender absSender, long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
-            .text("Отлично! Теперь вы можете пересылать сюда сообщения или книги")
-            .replyMarkup(Button.createSettingsMenuKeyboard())
+            .text("Отлично! Вы можете присылать боту посты ✉, книги 📚 — или 🔗 ссылки на telegra.ph или teletype.in!")
             .build();
         absSender.execute(sendMessage);
     }
@@ -80,7 +79,7 @@ public class EmailEnterCommandHandler implements UpdateHandler, CommandHandler, 
     private void sendIncorrectEmailMessage(AbsSender absSender, Long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
-            .text("❌ Email is incorrect")
+            .text("❌ Неправильный адрес")
             .build();
         absSender.execute(sendMessage);
     }
@@ -88,7 +87,7 @@ public class EmailEnterCommandHandler implements UpdateHandler, CommandHandler, 
     private void sendEmailEnterMessage (AbsSender absSender, Long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
-            .text("📧 Enter your kindle email:")
+            .text("📫 Напишите email вашего Kindle:")
             .build();
         absSender.execute(sendMessage);
     }
