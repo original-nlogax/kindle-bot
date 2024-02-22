@@ -42,14 +42,22 @@ public class BookCommandHandler extends AbstractBookSender implements CommandHan
         //deleteMessage(absSender, message);
 
         String format = document.getFileName().split("\\.")[1];
+
         if (!AVAILABLE_FORMATS.contains(format)) {
             sendFormatErrorMessage(absSender, chatId);
             return;
         }
 
-        Message processingMessage = sendProcessingMessage(absSender, chatId);
+        boolean isPdf = format.equals("pdf");
+        Message pdfMessage = null;
+        if (isPdf) pdfMessage = sendPdfMessage(absSender, chatId);
+
         java.io.File book = bookConverterService.convert (
             downloadBook (absSender, document));
+
+        if (isPdf) deleteMessage (absSender, pdfMessage);
+
+        Message processingMessage = sendProcessingMessage(absSender, chatId);
         sendBook(chatId, book);
         deleteMessage (absSender, processingMessage);
         sendSentMessage (absSender, chatId);
@@ -72,6 +80,15 @@ public class BookCommandHandler extends AbstractBookSender implements CommandHan
             .build();
 
         absSender.execute(sendMessage);
+    }
+
+    private Message sendPdfMessage(AbsSender absSender, Long chatId) throws TelegramApiException {
+        SendMessage sendMessage = SendMessage.builder()
+            .chatId(chatId)
+            .text("📝 Делаю pdf чуточку лучше...")
+            .build();
+
+        return absSender.execute(sendMessage);
     }
 
     @Override
