@@ -59,8 +59,6 @@ public class ForwardCommandHandler extends AbstractBookSender implements Command
 
     private String getHtmlText (Message message) {
         String text = message.getText();
-        //int brTagsCount = (text.length() - text.replace("\n", "").length());
-
         if (!message.hasEntities())
             return text;
 
@@ -101,7 +99,7 @@ public class ForwardCommandHandler extends AbstractBookSender implements Command
             title = text;
 
         title = title.replace("\n", "").replaceAll("<[^>]*>",""); // remove newlines and html tags
-        text = "<html><body>" + title + "<br><br>" + (text.replace("\n", "<br>")) + "</body></html>";
+        text = "<html><body>Автор: " + author + "<br><br>" + (text.replace("\n", "<br>")) + "</body></html>";
 
 
         Book book = new Book();
