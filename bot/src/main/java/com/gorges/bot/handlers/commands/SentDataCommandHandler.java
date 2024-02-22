@@ -100,6 +100,10 @@ public class SentDataCommandHandler implements ActionHandler, CommandHandler {
     public void executeCommand(AbsSender absSender, Update update, Long chatId, Object... args) throws TelegramApiException {
         userActionRepository.updateByChatId(
             chatId, new UserAction(getCommand(), SENT_DATA_ACTION));
+
+        if (args.length > 0 && args[0] != null && (boolean) args[0]) {
+            sendPossibleInputsMessage(absSender, chatId);
+        }
     }
 
     @Override

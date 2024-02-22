@@ -26,14 +26,10 @@ public class BookCommandHandler extends AbstractBookSender implements CommandHan
         "fb2", "epub", "pdf"    // todo azw, azw3, kfx, etc...
     );
 
-    private final MailService mailService;
-    private final UserRepository userRepository;
     private final BookConverterService bookConverterService;
 
     public BookCommandHandler(MailService mailService, UserRepository userRepository, BookConverterService bookConverterService) {
         super(mailService, userRepository);
-        this.mailService = mailService;
-        this.userRepository = userRepository;
         this.bookConverterService = bookConverterService;
     }
 
@@ -62,14 +58,6 @@ public class BookCommandHandler extends AbstractBookSender implements CommandHan
 
         bookConverterService.convert (
             downloadBook (absSender, document), result);
-
-        //if (pdfMessage != null) deleteMessage (absSender, pdfMessage);
-
-        /*
-        Message processingMessage = sendProcessingMessage(absSender, chatId);
-        sendBook(chatId, book);
-        deleteMessage (absSender, processingMessage);
-        sendSentMessage (absSender, chatId);*/
     }
 
     private Message sendConvertMessage(AbsSender absSender, Long chatId) throws TelegramApiException {

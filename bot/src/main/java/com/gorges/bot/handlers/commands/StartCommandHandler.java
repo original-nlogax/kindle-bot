@@ -54,13 +54,16 @@ public class StartCommandHandler implements UpdateHandler {
 
         sendGreeting(absSender, chatId);
 
-        saveUser(update);
+        User user = userRepository.findByChatId(chatId);
 
-        commandHandlerRegistry.find(Command.ENTER_EMAIL)
-            .executeCommand(absSender, update, chatId);
-
-        //if (adminRepository.isAdmin(chatId))
-        //    sendAdminPanelButton(absSender, chatId);
+        if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
+            saveUser(update);
+            commandHandlerRegistry.find(Command.ENTER_EMAIL)
+                .executeCommand(absSender, update, chatId);
+        } else {
+            commandHandlerRegistry.find(Command.SENT_DATA)
+                .executeCommand(absSender, update, chatId, true);
+        }
     }
 
     private void sendGreeting (AbsSender absSender, long chatId) throws TelegramApiException {

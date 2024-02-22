@@ -25,7 +25,7 @@ public abstract class AbstractBookSender {
         User user = userRepository.findByChatId(chatId);
         String to = user.getEmail();
         System.out.println("Sending book to " + to + "...");
-        //mailService.send(book, to);
+        mailService.send(book, to);
     }
 
     protected Message sendSendingMessage(AbsSender absSender, Long chatId) throws TelegramApiException {
