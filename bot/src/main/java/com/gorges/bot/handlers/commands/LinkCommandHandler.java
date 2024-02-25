@@ -47,8 +47,6 @@ public class LinkCommandHandler extends AbstractBookSender implements CommandHan
                 article.title(),
                 article.author(),
                 article.description());
-
-
             sendBook (chatId, book);
             deleteMessage (absSender, sendingMessage);
             sendSentMessage (absSender, chatId);
@@ -60,31 +58,6 @@ public class LinkCommandHandler extends AbstractBookSender implements CommandHan
         }
 
         sendInvalidWebsiteMessage(absSender, chatId);
-    }
-
-    private File createBook (String title, String author, String text) {
-        if (title.length() > MAX_TITLE_LENGTH)
-            title = title.substring(0, MAX_TITLE_LENGTH);
-        text = title + "<br><br>" + text.replaceAll("\\\\r?\\\\n", "<br>");
-        System.out.println(text);
-        Book book = new Book();
-        Metadata metadata = book.getMetadata();
-        metadata.addTitle(title);
-        metadata.addAuthor(new Author(author, author));
-        book.setCoverImage(Utils.getResource("cover.png", "cover.png"));
-        book.addSection("Text", new Resource(
-            text.getBytes(StandardCharsets.UTF_8), MediatypeService.XHTML));
-
-        String filename = Utils.removeForbiddenFilenameCharacters(title) + ".epub";
-        EpubWriter epubWriter = new EpubWriter();
-
-        try {
-            epubWriter.write(book, new FileOutputStream(filename));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return new File(filename);
     }
 
     private TelegraphArticle getTelegraphArticle (String name) {

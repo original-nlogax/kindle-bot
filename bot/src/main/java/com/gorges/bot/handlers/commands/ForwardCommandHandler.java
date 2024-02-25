@@ -51,7 +51,8 @@ public class ForwardCommandHandler extends AbstractBookSender implements Command
         // todo multiple authors; pass multiMessage.getMessages() to createBook
         String author = multiMessage.getMessages().get(0).getForwardFromChat().getTitle();
         Message sendingMessage = sendSendingMessage(absSender, chatId);
-        File book = createBook (author, text);
+        File book = createBook (
+            getTitleFromText(text), author, text);
         sendBook (chatId, book);
         deleteMessage (absSender, sendingMessage);
         sendSentMessage (absSender, chatId);
@@ -91,34 +92,14 @@ public class ForwardCommandHandler extends AbstractBookSender implements Command
     }
 
 
-    private File createBook(String author, String text) {
+    private String getTitleFromText (String text) {
         String title;
         if (text.length() > MAX_TITLE_LENGTH)
             title = text.substring(0, MAX_TITLE_LENGTH) + "...";
         else
             title = text;
 
-        title = title.replace("\n", "").replaceAll("<[^>]*>",""); // remove newlines and html tags
-        text = "<html><body>Автор: " + author + "<br><br>" + (text.replace("\n", "<br>")) + "</body></html>";
-
-
-        Book book = new Book();
-        Metadata metadata = book.getMetadata();
-        metadata.addTitle(title);
-        metadata.addAuthor(new Author(author));
-        book.setCoverImage(Utils.getResource("cover.png", "cover.png"));
-        book.addSection("Text", new Resource(
-            text.getBytes(StandardCharsets.UTF_8), MediatypeService.XHTML));
-
-        EpubWriter epubWriter = new EpubWriter();
-        String filename = Utils.removeForbiddenFilenameCharacters(title) + ".epub";
-        try {
-            epubWriter.write(book, new FileOutputStream(filename));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return new File(filename);
+        return title.replace("\n", "").replaceAll("<[^>]*>",""); // remove newlines and html tags
     }
 
     @Override
