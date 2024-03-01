@@ -75,10 +75,8 @@ public class ForwardCommandHandler extends AbstractBookSender implements Command
                 default -> "";
             };
 
-            if (tag.equals("")) {
-                System.out.println(tag);
+            if (tag.equals(""))
                 continue;
-            }
 
             String openingTag = "<" + tag + ">";
             String closingTag = "</" + tag + ">";
@@ -90,7 +88,6 @@ public class ForwardCommandHandler extends AbstractBookSender implements Command
 
         return sb.toString();
     }
-
 
     private String getTitleFromText (String text) {
         String title;

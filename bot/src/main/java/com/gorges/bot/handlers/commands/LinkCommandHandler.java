@@ -1,6 +1,8 @@
 package com.gorges.bot.handlers.commands;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.gorges.bot.handlers.CommandHandler;
 import com.gorges.bot.models.domain.Command;
@@ -28,6 +30,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class LinkCommandHandler extends AbstractBookSender implements CommandHandler {
 
@@ -42,18 +47,17 @@ public class LinkCommandHandler extends AbstractBookSender implements CommandHan
         if (url.contains("telegra.ph")) {
             Message sendingMessage = sendSendingMessage(absSender, chatId);
             String articleName = url.split("/")[url.split("/").length-1];
+
             TelegraphArticle article = getTelegraphArticle (articleName);
-            File book = createBook(
-                article.title(),
-                article.author(),
-                article.description());
-            sendBook (chatId, book);
+            File book = createBook (article.title(), article.author(), article.text());
+            //sendBook (chatId, book);
+
             deleteMessage (absSender, sendingMessage);
             sendSentMessage (absSender, chatId);
             return;
         }
 
-        if (url.contains("teletype.in")){
+        if (url.contains("teletype.in")) {
             return;
         }
 
@@ -61,7 +65,7 @@ public class LinkCommandHandler extends AbstractBookSender implements CommandHan
     }
 
     private TelegraphArticle getTelegraphArticle (String name) {
-        URI uri = URI.create("https://api.telegra.ph/getPage/" + name);
+        URI uri = URI.create("https://api.telegra.ph/getPage/" + name + "?return_content=true");
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest
@@ -75,19 +79,60 @@ public class LinkCommandHandler extends AbstractBookSender implements CommandHan
             JsonObject result = new Gson().fromJson(response.body(), JsonObject.class)
                 .getAsJsonObject("result");
 
+            List<JsonElement> elements = result.get("content").getAsJsonArray().asList();
+            List<JsonArray> arrays = elements.stream()
+                .map(JsonElement::getAsJsonObject)
+                .map(o -> o.get("children").getAsJsonArray())
+                .toList();
+
+            StringBuilder sb = new StringBuilder();
+
+            for (JsonArray arr : arrays) {
+                for (JsonElement el : arr.asList()) {
+                    if (el.isJsonObject()) {
+                        JsonObject obj = el.getAsJsonObject();
+                        String tag = obj.get("tag").getAsString();
+                        switch (tag) {
+                            case "br" -> sb.append("<br>");
+                            case "a" -> {
+                                // todo implement links?
+                            }
+                            default -> {
+                                if (obj.has("children")) {
+                                    String taggedText = obj.get("children").getAsString();
+                                    sb
+                                        .append("<").append(tag).append(">")
+                                        .append(taggedText)
+                                        .append("</").append(tag).append(">");
+                                }
+                            }
+                        }
+
+                    } else {
+                        sb.append(el.getAsString());
+                    }
+                }
+
+                sb.append("<br>");
+            }
+
             return new TelegraphArticle(
                 result.get("title").getAsString(),
                 result.get("author_name").getAsString(),
-                result.get("description").getAsString());
+                sb.toString());
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private String getTelegraphHtmlText (JsonElement jsonElement) {
+        return "";
+    }
+
     private void sendInvalidWebsiteMessage (AbsSender absSender, long chatId) throws TelegramApiException {
         SendMessage sendMessage = SendMessage.builder()
             .chatId(chatId)
-            .text("❌ I can send articles only from telegra.ph or teletype.in!")
+            .text("❌ Я могу отправлять статьи только с telegra.ph или teletype.in!")
             .build();
         absSender.execute(sendMessage);
     }
